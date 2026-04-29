@@ -23,6 +23,7 @@ db = firebase_db.init_firebase()
 REGIONS = ["Centre", "Littoral", "Ouest", "Sud", "Est", "Adamaoua", "Nord", "Extrême-Nord", "Nord-Ouest", "Sud-Ouest"]
 SAISONS = ["Saison Sèche", "Saison des Pluies"]
 CULTURES = ["Maïs", "Sorgho", "Manioc", "Mil", "Cacao"]
+ANNEES = list(range(2024, 2031))
 
 def main():
     st.sidebar.title("🌾 Agricollect CM")
@@ -58,6 +59,7 @@ def show_form_page():
             saison = st.selectbox("Saison", SAISONS)
             
         with col2:
+            annee = st.selectbox("Année", ANNEES)
             culture = st.selectbox("Type de culture", CULTURES)
             quantite = st.number_input("Quantité produite (en Tonnes)", min_value=0.0, step=0.5, format="%.2f")
             
@@ -72,6 +74,7 @@ def show_form_page():
                 data = {
                     "cooperative": coop_name,
                     "region": region,
+                    "annee": annee,
                     "saison": saison,
                     "culture": culture,
                     "quantite": quantite
@@ -100,7 +103,7 @@ def show_dashboard_page():
     # Mettre en forme pour l'affichage : tri par date décroissante
     df_display = df.sort_values(by="timestamp", ascending=False)
     # Réordonner les colonnes optionnel
-    columns = ["cooperative", "region", "saison", "culture", "quantite", "timestamp"]
+    columns = ["cooperative", "region", "annee", "saison", "culture", "quantite", "timestamp"]
     if all(col in df_display.columns for col in columns):
         df_display = df_display[columns]
         
@@ -126,6 +129,23 @@ def show_analytics_page():
     if df.empty:
         st.info("Aucune donnée disponible pour les visualisations.")
         return
+        
+    st.subheader("Indicateurs Globaux")
+    m1, m2, m3 = st.columns(3)
+    m1.metric(label="Total des Déclarations", value=len(df))
+    m2.metric(label="Production Totale (Tonnes)", value=f"{df['quantite'].sum():.2f}")
+    if 'annee' in df.columns:
+        m3.metric(label="Dernière Année Actuelle", value=df['annee'].max())
+    
+    st.markdown("---")
+    
+    # --- EVOLUTION LINE CHART ---
+    st.subheader("Évolution Chronologique (Par Saison)")
+    df_evolution = data_process.get_evolution_by_season_year(df)
+    fig_line = visualizations.create_evolution_chart(df_evolution)
+    st.plotly_chart(fig_line, use_container_width=True)
+    
+    st.markdown("---")
         
     st.subheader("Carte de la Production par Région (Tonnes)")
     

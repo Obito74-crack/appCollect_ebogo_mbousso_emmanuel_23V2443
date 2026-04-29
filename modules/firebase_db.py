@@ -14,20 +14,23 @@ def init_firebase():
     """Charge la configuration Firebase depuis Streamlit Secrets, .env, ou un fichier JSON."""
     if not firebase_admin._apps:
         # 1. Essayer Streamlit Secrets
-        if "firebase" in st.secrets:
-            cred_dict = dict(st.secrets["firebase"])
-            # Format correction for private_key if needed
-            if "\\n" in cred_dict.get("private_key", ""):
-                cred_dict["private_key"] = cred_dict["private_key"].replace("\\n", "\n")
-            try:
-                cred = credentials.Certificate(cred_dict)
-                firebase_admin.initialize_app(cred)
-                return firestore.client()
-            except Exception as e:
-                print(f"Erreur init Streamlit secrets Firebase: {e}")
+        try:
+            if "firebase" in st.secrets:
+                cred_dict = dict(st.secrets["firebase"])
+                # Format correction for private_key if needed
+                if "\\n" in cred_dict.get("private_key", ""):
+                    cred_dict["private_key"] = cred_dict["private_key"].replace("\\n", "\n")
+                try:
+                    cred = credentials.Certificate(cred_dict)
+                    firebase_admin.initialize_app(cred)
+                    return firestore.client()
+                except Exception as e:
+                    print(f"Erreur init Streamlit secrets Firebase: {e}")
+        except Exception:
+            pass
                 
         # 2. Essayer les variables d'environnement (via dotenv)
-        elif os.environ.get("FIREBASE_PROJECT_ID"):
+        if os.environ.get("FIREBASE_PROJECT_ID"):
             cred_dict = {
                 "type": os.environ.get("FIREBASE_TYPE", "service_account"),
                 "project_id": os.environ.get("FIREBASE_PROJECT_ID"),

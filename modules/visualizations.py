@@ -83,3 +83,20 @@ def create_season_culture_chart(df_season_culture):
         color_discrete_map={"Saison Sèche": "#FFA07A", "Saison des Pluies": "#20B2AA"}
     )
     return fig
+
+def create_evolution_chart(df_evolution):
+    """Crée un graphique linéaire interactif pour suivre l'évolution de la production totale."""
+    if df_evolution.empty:
+        fig = px.line(title="Évolution de la Production (Aucune donnée)")
+        return fig
+        
+    fig = px.line(
+        df_evolution, 
+        x="periode", 
+        y="quantite", 
+        title="Évolution de la Production (Tonnes)",
+        labels={"quantite": "Volume de Récolte", "periode": "Saison (Chronologique)"},
+        markers=True
+    )
+    fig.update_traces(line_color="#228B22", marker=dict(size=10, color="#FF4500"))
+    return fig
