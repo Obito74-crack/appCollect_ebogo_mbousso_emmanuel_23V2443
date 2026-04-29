@@ -12,7 +12,7 @@ from modules import firebase_db, data_process, visualizations
 # Configuration de la page
 st.set_page_config(
     page_title="Agricollect - Cameroun",
-    page_icon="🌾",
+    page_icon="",
     layout="wide"
 )
 
@@ -46,9 +46,7 @@ def show_form_page():
     st.title("Déclaration de Production")
     st.markdown("Veuillez remplir le formulaire ci-dessous pour déclarer la récolte de votre coopérative.")
     
-    # Détection mode Mock
-    if db is None:
-        st.warning("Mode développement (Mock) activé. Les données seront perdues au redémarrage complet de l'application.")
+
         
     with st.form("form_production", clear_on_submit=True):
         col1, col2 = st.columns(2)
